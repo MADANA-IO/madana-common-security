@@ -56,5 +56,5 @@
 
 	</build>
 
-	<version>${version}</version>
+	<version>${bamboo.mcsecurity.version}</version>
 </project>
