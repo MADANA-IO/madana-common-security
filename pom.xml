@@ -56,5 +56,5 @@
 
 	</build>
 
-	<version>unknownversion</version>
+	<version>${version}</version>
 </project>
