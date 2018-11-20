@@ -38,6 +38,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -95,7 +96,7 @@ public class AsymmetricCryptography
 		init();	
 		validateKeypair();
 	}
-	AsymmetricCryptography (PublicKey publicKey , PrivateKey privateKey ) throws Exception
+	public AsymmetricCryptography (PublicKey publicKey , PrivateKey privateKey ) throws Exception
 	{
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
@@ -146,7 +147,13 @@ public class AsymmetricCryptography
 		fos.write(Base64.encodeBase64(getPrivateKeyAsByteArray()));
 		fos.close();
 	}
-
+	public static PrivateKey convertStringToPrivateKey(String text) throws NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(Base64.decodeBase64(text));
+		KeyFactory kf = KeyFactory.getInstance(algorithm);
+		return  kf.generatePrivate(spec);
+	
+	}
 	public static PrivateKey loadPrivateKeyFromFile(String filename)	throws Exception 
 	{
 
@@ -165,7 +172,13 @@ public class AsymmetricCryptography
 
 		fos.close();
 	}
-
+	public static PublicKey convertStringToPublicKey(String text) throws NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		X509EncodedKeySpec spec =	new X509EncodedKeySpec(Base64.decodeBase64(text));
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		return kf.generatePublic(spec);
+	
+	}
 	public static PublicKey loadPublicKeyFromFile(String filename)	throws Exception 
 	{
 
