@@ -21,17 +21,23 @@
 package de.madana.common.security.crypto;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -42,100 +48,178 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.net.util.Base64;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class AsymmetricCryptography.
  */
-public class AsymmetricCryptography {
-	
-	/** The cipher. */
+public class AsymmetricCryptography 
+{
+
+	private KeyPairGenerator keyGen;
+	private KeyPair pair;
+	private PrivateKey privateKey;
+	private PublicKey publicKey;
+	private static String algorithm="RSA";
 	private Cipher cipher;
-	
-	/**
-	 * Instantiates a new asymmetric cryptography.
-	 *
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws NoSuchPaddingException the no such padding exception
-	 */
-	public AsymmetricCryptography() throws NoSuchAlgorithmException, NoSuchPaddingException{
-		this.cipher = Cipher.getInstance("RSA");
+	private int keylength = 4096;
+
+	private void init() throws NoSuchAlgorithmException, NoSuchPaddingException
+	{
+		this.cipher = Cipher.getInstance(algorithm);
+		this.keyGen = KeyPairGenerator.getInstance(algorithm);
+		this.keyGen.initialize(keylength);
 	}
-	
+	public AsymmetricCryptography() throws NoSuchAlgorithmException, NoSuchPaddingException 
+	{
+		init();	
+	}
+
 	/**
-	 * Gets the private.
+	 * Instantiates a new generate keys.
 	 *
-	 * @param filename the filename
-	 * @return the private
-	 * @throws Exception the exception
+	 * @param keylength the keylength
+	 * @throws NoSuchPaddingException 
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws NoSuchProviderException the no such provider exception
 	 */
-	//https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
-	public PrivateKey getPrivate(String filename) throws Exception {
-		byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());
-		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-		KeyFactory kf = KeyFactory.getInstance("RSA");
+	public AsymmetricCryptography(int keylength) throws NoSuchAlgorithmException, NoSuchPaddingException 
+	{
+		this.keylength=keylength;
+		init();	
+	}
+
+	AsymmetricCryptography (byte[] publicKeyBytes , byte []privateKeyBytes ) throws Exception
+	{
+		KeyFactory kf = KeyFactory.getInstance(algorithm);
+		privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+		publicKey = kf.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+		init();	
+		validateKeypair();
+	}
+	AsymmetricCryptography (PublicKey publicKey , PrivateKey privateKey ) throws Exception
+	{
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
+		init();	
+		validateKeypair();
+	}
+
+	public void validateKeypair() throws Exception
+	{
+		RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+		RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) privateKey;
+		if(!( rsaPublicKey.getModulus().equals( rsaPrivateKey.getModulus() )
+				&& BigInteger.valueOf( 2 ).modPow( rsaPublicKey.getPublicExponent()
+						.multiply( rsaPrivateKey.getPrivateExponent() ).subtract( BigInteger.ONE ),
+						rsaPublicKey.getModulus() ).equals( BigInteger.ONE )))
+		{
+			throw new Exception("Keypair is not matching");
+		}
+	}
+
+
+
+	/**
+	 * Creates the keys.
+	 */
+	public void createKeys() 
+	{
+		this.pair = this.keyGen.generateKeyPair();
+		this.privateKey = pair.getPrivate();
+		this.publicKey = pair.getPublic();
+	}
+
+	/**
+	 * Saves both public key and private  key to file names specified
+	 * @param fnpub  file name of public key
+	 * @param fnpri  file name of private key
+	 * @throws IOException
+	 */
+	public  void SaveKeyPair(String fnpub,String fnpri) throws IOException 
+	{ 
+
+		savePublicKeyToFile(fnpub);
+		savePrivateKeyToFile(fnpri);
+	}
+	public void savePrivateKeyToFile(String filename) throws IOException
+	{
+		FileOutputStream fos = new FileOutputStream(filename);
+		fos.write(Base64.encodeBase64(getPrivateKeyAsByteArray()));
+		fos.close();
+	}
+
+	public static PrivateKey loadPrivateKeyFromFile(String filename)	throws Exception 
+	{
+
+
+		byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
+
+		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(Base64.decodeBase64(keyBytes));
+		KeyFactory kf = KeyFactory.getInstance(algorithm);
 		return kf.generatePrivate(spec);
 	}
+
+	public void savePublicKeyToFile(String filename) throws IOException
+	{
+		FileOutputStream fos = new FileOutputStream(filename);
+		fos.write(Base64.encodeBase64(getPublicKeyAsByteArray()));
+
+		fos.close();
+	}
+
+	public static PublicKey loadPublicKeyFromFile(String filename)	throws Exception 
+	{
+
+		byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
 	
-	/**
-	 * Gets the public.
-	 *
-	 * @param filename the filename
-	 * @return the public
-	 * @throws Exception the exception
-	 */
-	//https://docs.oracle.com/javase/8/docs/api/java/security/spec/X509EncodedKeySpec.html
-	public PublicKey getPublic(String filename) throws Exception {
-		byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());
-		X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+		X509EncodedKeySpec spec =	new X509EncodedKeySpec(Base64.decodeBase64(keyBytes));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		return kf.generatePublic(spec);
 	}
-	
+
+
+
+
+
+
 	/**
-	 * Encrypt file.
+	 * Gets the private key.
 	 *
-	 * @param input the input
-	 * @param output the output
-	 * @param key the key
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws GeneralSecurityException the general security exception
+	 * @return the private key
 	 */
-	public void encryptFile(byte[] input, File output, PrivateKey key) throws IOException, GeneralSecurityException {
-		this.cipher.init(Cipher.ENCRYPT_MODE, key);
-		writeToFile(output, this.cipher.doFinal(input));
-    }
-	
-	/**
-	 * Decrypt file.
-	 *
-	 * @param input the input
-	 * @param output the output
-	 * @param key the key
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws GeneralSecurityException the general security exception
-	 */
-	public void decryptFile(byte[] input, File output, PublicKey key) throws IOException, GeneralSecurityException {
-		this.cipher.init(Cipher.DECRYPT_MODE, key);
-		writeToFile(output, this.cipher.doFinal(input));
-    }
-	
-	/**
-	 * Write to file.
-	 *
-	 * @param output the output
-	 * @param toWrite the to write
-	 * @throws IllegalBlockSizeException the illegal block size exception
-	 * @throws BadPaddingException the bad padding exception
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	private void writeToFile(File output, byte[] toWrite) throws IllegalBlockSizeException, BadPaddingException, IOException{
-		FileOutputStream fos = new FileOutputStream(output);
-		fos.write(toWrite);
-		fos.flush();
-		fos.close();
+	public PrivateKey getPrivateKey() 
+	{
+		return this.privateKey;
 	}
-	
+	public byte[] getPrivateKeyAsByteArray()
+	{
+		PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
+		return pkcs8EncodedKeySpec.getEncoded();
+	}
+
+	/**
+	 * Gets the public key.
+	 *
+	 * @return the public key
+	 */
+	public PublicKey getPublicKey() 
+	{
+		return this.publicKey;
+	}
+
+	public byte[] getPublicKeyAsByteArray()
+	{
+		X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());		
+		return x509EncodedKeySpec.getEncoded();
+	}
+	/**
+	 * Gets the keypair.
+	 *
+	 * @return the keypair
+	 */
+	public KeyPair getKeypair()
+	{
+		return pair;
+	}
 	/**
 	 * Encrypt text.
 	 *
@@ -169,43 +253,49 @@ public class AsymmetricCryptography {
 		this.cipher.init(Cipher.DECRYPT_MODE, key);
 		return new String(cipher.doFinal(Base64.decodeBase64(msg)), "UTF-8");
 	}
+	/**
+	 * Encrypt file.
+	 *
+	 * @param input the input
+	 * @param output the output
+	 * @param key the key
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws GeneralSecurityException the general security exception
+	 */
+	public void encryptFile(byte[] input, File output, PrivateKey key) throws IOException, GeneralSecurityException {
+		this.cipher.init(Cipher.ENCRYPT_MODE, key);
+		writeToFile(output, this.cipher.doFinal(input));
+    }
 	
 	/**
-	 * Gets the file in bytes.
+	 * Decrypt file.
 	 *
-	 * @param f the f
-	 * @return the file in bytes
+	 * @param input the input
+	 * @param output the output
+	 * @param key the key
 	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws GeneralSecurityException the general security exception
 	 */
-	public byte[] getFileInBytes(File f) throws IOException{
-		FileInputStream fis = new FileInputStream(f);
-		byte[] fbytes = new byte[(int) f.length()];
-		fis.read(fbytes);
-		fis.close();
-		return fbytes;
-	}
+	public void decryptFile(byte[] input, File output, PublicKey key) throws IOException, GeneralSecurityException {
+		this.cipher.init(Cipher.DECRYPT_MODE, key);
+		writeToFile(output, this.cipher.doFinal(input));
+    }
 
 	/**
-	 * The main method.
+	 * Write to file.
 	 *
-	 * @param args the arguments
-	 * @throws Exception the exception
+	 * @param output the output
+	 * @param toWrite the to write
+	 * @throws IllegalBlockSizeException the illegal block size exception
+	 * @throws BadPaddingException the bad padding exception
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static void main(String[] args) throws Exception {
-		AsymmetricCryptography ac = new AsymmetricCryptography();
-		PrivateKey privateKey = ac.getPrivate("KeyPair/privateKey");
-		PublicKey publicKey = ac.getPublic("KeyPair/publicKey");
-		
-		String msg = "Cryptography is fun!";
-		String encrypted_msg = ac.encryptText(msg, privateKey);
-		String decrypted_msg = ac.decryptText(encrypted_msg, publicKey);
-		System.out.println("Original Message: " + msg + "\nEncrypted Message: " + encrypted_msg + "\nDecrypted Message: " + decrypted_msg);
-		
-		if(new File("KeyPair/text.txt").exists()){
-			ac.encryptFile(ac.getFileInBytes(new File("KeyPair/text.txt")), new File("KeyPair/text_encrypted.txt"), privateKey);
-			ac.decryptFile(ac.getFileInBytes(new File("KeyPair/text_encrypted.txt")), new File("KeyPair/text_decrypted.txt"), publicKey);
-		}else{
-			System.out.println("Create a file text.txt under folder KeyPair");
-		}
+	private void writeToFile(File output, byte[] toWrite) throws IllegalBlockSizeException, BadPaddingException, IOException{
+		FileOutputStream fos = new FileOutputStream(output);
+		fos.write(toWrite);
+		fos.flush();
+		fos.close();
 	}
+	
+
 }
