@@ -20,12 +20,15 @@
  ******************************************************************************/
 package de.madana.common.security.certficate;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -187,6 +190,26 @@ public class CertificateHandler
 	}
 	
 	
+
+public static X509Certificate convertPEMToCertifcate(String certEntry) throws IOException {
+ 
+        InputStream in = null;
+        X509Certificate cert = null;
+        try {
+            byte[] certEntryBytes = certEntry.getBytes();
+            in = new ByteArrayInputStream(certEntryBytes);
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+ 
+            cert = (X509Certificate) certFactory.generateCertificate(in);
+        } catch (CertificateException ex) {
+ 
+        } finally {
+            if (in != null) {
+                    in.close();
+            }
+        }
+        return cert;
+    }
 	/**
 	 * Convert certificate to PEM.
 	 *
@@ -194,7 +217,7 @@ public class CertificateHandler
 	 * @return the string
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private static String convertCertificateToPEM(X509Certificate signedCertificate) throws IOException {
+	public static String convertCertificateToPEM(X509Certificate signedCertificate) throws IOException {
 		StringWriter signedCertificatePEMDataStringWriter = new StringWriter();
 		JcaPEMWriter pemWriter = new JcaPEMWriter(signedCertificatePEMDataStringWriter);
 		pemWriter.writeObject(signedCertificate);

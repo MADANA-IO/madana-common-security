@@ -61,7 +61,7 @@ public class AsymmetricCryptography
 	private PublicKey publicKey;
 	private static String algorithm="RSA";
 	private Cipher cipher;
-	private int keylength = 4096;
+	private int keylength = 2048;
 
 	private void init() throws NoSuchAlgorithmException, NoSuchPaddingException
 	{
@@ -149,7 +149,7 @@ public class AsymmetricCryptography
 	}
 	public static PrivateKey convertStringToPrivateKey(String text) throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
-		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(Base64.decodeBase64(text));
+		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(Base64.decodeBase64(text.getBytes()));
 		KeyFactory kf = KeyFactory.getInstance(algorithm);
 		return  kf.generatePrivate(spec);
 	
