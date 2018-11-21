@@ -78,7 +78,7 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
  */
 public class CertificateHandler
 {
-	  static String signatureAlgorithm = "SHA256WithRSA"; 
+	static String signatureAlgorithm = "SHA256WithRSA"; 
 	/**
 	 * Self sign.
 	 *
@@ -91,39 +91,39 @@ public class CertificateHandler
 	 */
 	public static X509Certificate selfSign(KeyPair keyPair, String certCN, String certOU, String certO, String certL, String certC) throws OperatorCreationException, CertificateException, IOException
 	{
-	    Provider bcProvider = new BouncyCastleProvider();
-	    Security.addProvider(bcProvider);
+		Provider bcProvider = new BouncyCastleProvider();
+		Security.addProvider(bcProvider);
 
-	    long now = System.currentTimeMillis();
-	    Date startDate = new Date(now);
+		long now = System.currentTimeMillis();
+		Date startDate = new Date(now);
 
-	    X500Name dnName = new X500Name("CN="+certCN+", OU="+certOU+", O="+certO+", L="+certL+",C="+certC);
-	    BigInteger certSerialNumber = new BigInteger(Long.toString(now)); // <-- Using the current timestamp as the certificate serial number
+		X500Name dnName = new X500Name("CN="+certCN+", OU="+certOU+", O="+certO+", L="+certL+",C="+certC);
+		BigInteger certSerialNumber = new BigInteger(Long.toString(now)); // <-- Using the current timestamp as the certificate serial number
 
-	    Calendar calendar = Calendar.getInstance();
-	    calendar.setTime(startDate);
-	    calendar.add(Calendar.YEAR, 20); // <-- 1 Yr validity
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startDate);
+		calendar.add(Calendar.YEAR, 20); // <-- 1 Yr validity
 
-	    Date endDate = calendar.getTime();
+		Date endDate = calendar.getTime();
 
-	  // <-- Use appropriate signature algorithm based on your keyPair algorithm.
+		// <-- Use appropriate signature algorithm based on your keyPair algorithm.
 
-	    ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(keyPair.getPrivate());
+		ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(keyPair.getPrivate());
 
-	    JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName, keyPair.getPublic());
+		JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName, keyPair.getPublic());
 
-	    // Extensions --------------------------
+		// Extensions --------------------------
 
-	    // Basic Constraints
-	    BasicConstraints basicConstraints = new BasicConstraints(true); // <-- true for CA, false for EndEntity
+		// Basic Constraints
+		BasicConstraints basicConstraints = new BasicConstraints(true); // <-- true for CA, false for EndEntity
 
-	    certBuilder.addExtension(new ASN1ObjectIdentifier("2.5.29.19"), true, basicConstraints); // Basic Constraints is usually marked as critical.
+		certBuilder.addExtension(new ASN1ObjectIdentifier("2.5.29.19"), true, basicConstraints); // Basic Constraints is usually marked as critical.
 
-	    // -------------------------------------
+		// -------------------------------------
 
-	    return new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(contentSigner));
+		return new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(contentSigner));
 	}
-	
+
 	public static PKCS10CertificationRequest createCSR( KeyPair pair, String certificateDN) throws OperatorCreationException
 	{
 		X500Principal subject = new X500Principal (certificateDN);
@@ -132,7 +132,7 @@ public class CertificateHandler
 		PKCS10CertificationRequest csr = builder.build(signGen);
 		return csr;
 	}
-	
+
 	/**
 	 * Sign certificate request.
 	 *
@@ -149,16 +149,16 @@ public class CertificateHandler
 	 * @throws OperatorCreationException the operator creation exception
 	 */
 	public static X509Certificate signCertificateRequest(X509Certificate caCert, PrivateKey caPrivateKey, PKCS10CertificationRequest csr, int validateMonths)
-					throws NoSuchAlgorithmException, InvalidKeyException, CertificateException, CertIOException, OperatorCreationException {
+			throws NoSuchAlgorithmException, InvalidKeyException, CertificateException, CertIOException, OperatorCreationException {
 
-		  long now = System.currentTimeMillis();
-		    Date notBefore = new Date(now);
-		    
-		    Calendar calendar = Calendar.getInstance();
-		    calendar.setTime(notBefore);
-		    calendar.add(Calendar.MONTH, validateMonths); 
+		long now = System.currentTimeMillis();
+		Date notBefore = new Date(now);
 
-		    Date notAfter = calendar.getTime();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(notBefore);
+		calendar.add(Calendar.MONTH, validateMonths); 
+
+		Date notAfter = calendar.getTime();
 		JcaPKCS10CertificationRequest jcaRequest = new JcaPKCS10CertificationRequest(csr);
 		X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(caCert,
 				BigInteger.valueOf(System.currentTimeMillis()), notBefore, notAfter, jcaRequest.getSubject(), jcaRequest.getPublicKey());
@@ -188,28 +188,28 @@ public class CertificateHandler
 		ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(caPrivateKey);
 		return new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateBuilder.build(signer));
 	}
-	
-	
 
-public static X509Certificate convertPEMToCertifcate(String certEntry) throws IOException {
- 
-        InputStream in = null;
-        X509Certificate cert = null;
-        try {
-            byte[] certEntryBytes = certEntry.getBytes();
-            in = new ByteArrayInputStream(certEntryBytes);
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
- 
-            cert = (X509Certificate) certFactory.generateCertificate(in);
-        } catch (CertificateException ex) {
- 
-        } finally {
-            if (in != null) {
-                    in.close();
-            }
-        }
-        return cert;
-    }
+
+
+	public static X509Certificate convertPEMToCertifcate(String certEntry) throws IOException {
+
+		InputStream in = null;
+		X509Certificate cert = null;
+		try {
+			byte[] certEntryBytes = certEntry.getBytes();
+			in = new ByteArrayInputStream(certEntryBytes);
+			CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+
+			cert = (X509Certificate) certFactory.generateCertificate(in);
+		} catch (CertificateException ex) {
+
+		} finally {
+			if (in != null) {
+				in.close();
+			}
+		}
+		return cert;
+	}
 	/**
 	 * Convert certificate to PEM.
 	 *
@@ -225,36 +225,50 @@ public static X509Certificate convertPEMToCertifcate(String certEntry) throws IO
 		return signedCertificatePEMDataStringWriter.toString();
 	}
 
-    /**
-     * Write to file.
-     *
-     * @param path the path
-     * @param key the key
-     * @throws CertificateEncodingException 
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
+	/**
+	 * Write to file.
+	 *
+	 * @param path the path
+	 * @param key the key
+	 * @throws CertificateEncodingException 
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void writeToFile(X509Certificate oCert, String path) throws CertificateEncodingException, IOException 
 	{
-	
-		String strPEM = CertificateHandler.convertCertificateToPEM(oCert);
-			File f = new File(path);
-			f.getParentFile().mkdirs();
 
-			try (PrintStream out = new PrintStream(new FileOutputStream(f))) 
-			{
-			    out.print(strPEM);
-			}
-		
-	
-		
+		String strPEM = CertificateHandler.convertCertificateToPEM(oCert);
+		File f = new File(path);
+		f.getParentFile().mkdirs();
+
+		try (PrintStream out = new PrintStream(new FileOutputStream(f))) 
+		{
+			out.print(strPEM);
+		}
+
+
+
 	}
-	
+	public static X509Certificate getCertificateFromInputStream(InputStream is) throws CertificateException
+	{
+		CertificateFactory fact = CertificateFactory.getInstance("X.509");
+		X509Certificate cer = (X509Certificate) fact.generateCertificate(is);
+		try
+		{
+			is.close();
+		}
+		catch(Exception ex)
+		{
+
+		}
+		return cer;
+	}
 	public static X509Certificate getCertificateFromFile(String filename) throws CertificateException, FileNotFoundException
 	{
-		  CertificateFactory fact = CertificateFactory.getInstance("X.509");
-		    FileInputStream is = new FileInputStream (filename);
-		    X509Certificate cer = (X509Certificate) fact.generateCertificate(is);
-		    return cer;
+
+		FileInputStream is = new FileInputStream (filename);
+		return getCertificateFromInputStream(is);
+
+
 	}
-	
+
 }
