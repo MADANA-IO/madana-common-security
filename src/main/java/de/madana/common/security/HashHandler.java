@@ -86,16 +86,27 @@ public class HashHandler
 	 */
 	public static String generateHash(String plaintext) throws NoSuchAlgorithmException
 	{
+		return generateHash(plaintext.getBytes());
+
+	}
+	/**
+	 * 
+	 * @param data
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 */
+	public static String generateHash(byte[] data) throws NoSuchAlgorithmException
+	{
 		MessageDigest m = MessageDigest.getInstance("SHA-256");
 		m.reset();
-		m.update(plaintext.getBytes());
+		m.update(data);
 		byte[] digest = m.digest();
 		BigInteger bigInt = new BigInteger(1,digest);
 		String hashtext = bigInt.toString(16);
 		// Now we need to zero pad it if you actually want the full 32 chars.
 		while(hashtext.length() < 32 )
 		{
-		  hashtext = "8"+hashtext;
+		  hashtext = "0"+hashtext;
 		}
 		return hashtext;
 	}
