@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -36,6 +37,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -152,7 +154,7 @@ public class AsymmetricCryptography
 		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(Base64.decodeBase64(text.getBytes()));
 		KeyFactory kf = KeyFactory.getInstance(algorithm);
 		return  kf.generatePrivate(spec);
-	
+
 	}
 	public static PrivateKey loadPrivateKeyFromFile(String filename)	throws Exception 
 	{
@@ -177,13 +179,13 @@ public class AsymmetricCryptography
 		X509EncodedKeySpec spec =	new X509EncodedKeySpec(Base64.decodeBase64(text));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		return kf.generatePublic(spec);
-	
+
 	}
 	public static PublicKey loadPublicKeyFromFile(String filename)	throws Exception 
 	{
 
 		byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
-	
+
 		X509EncodedKeySpec spec =	new X509EncodedKeySpec(Base64.decodeBase64(keyBytes));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		return kf.generatePublic(spec);
@@ -250,7 +252,7 @@ public class AsymmetricCryptography
 		this.cipher.init(Cipher.ENCRYPT_MODE, key);
 		return Base64.encodeBase64String(cipher.doFinal(msg.getBytes("UTF-8")));
 	}
-	
+
 	/**
 	 * Decrypt text.
 	 *
@@ -278,8 +280,8 @@ public class AsymmetricCryptography
 	public void encryptFile(byte[] input, File output, PrivateKey key) throws IOException, GeneralSecurityException {
 		this.cipher.init(Cipher.ENCRYPT_MODE, key);
 		writeToFile(output, this.cipher.doFinal(input));
-    }
-	
+	}
+
 	/**
 	 * Decrypt file.
 	 *
@@ -292,7 +294,7 @@ public class AsymmetricCryptography
 	public void decryptFile(byte[] input, File output, PublicKey key) throws IOException, GeneralSecurityException {
 		this.cipher.init(Cipher.DECRYPT_MODE, key);
 		writeToFile(output, this.cipher.doFinal(input));
-    }
+	}
 
 	/**
 	 * Write to file.
@@ -303,12 +305,50 @@ public class AsymmetricCryptography
 	 * @throws BadPaddingException the bad padding exception
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private void writeToFile(File output, byte[] toWrite) throws IllegalBlockSizeException, BadPaddingException, IOException{
+	private void writeToFile(File output, byte[] toWrite) throws IllegalBlockSizeException, BadPaddingException, IOException
+	{
 		FileOutputStream fos = new FileOutputStream(output);
-		fos.write(toWrite);
-		fos.flush();
-		fos.close();
+		try
+		{
+			fos.write(toWrite);
+			fos.flush();
+		}
+		finally
+		{
+			fos.close();
+		}
 	}
-	
+	/**
+	 * 
+	 * @param plainText
+	 * @param signature
+	 * @param publicKey
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean verify(String plainText, String signature) throws Exception
+	{
+		Signature publicSignature = Signature.getInstance("SHA256withRSA");
+		publicSignature.initVerify(publicKey);
+		publicSignature.update(plainText.getBytes(StandardCharsets.UTF_8));
+		byte[] signatureBytes = Base64.decodeBase64(signature);
+		return publicSignature.verify(signatureBytes);
+	}
+	/**
+	 * 
+	 * @param plainText
+	 * @param privateKey
+	 * @return
+	 * @throws Exception
+	 */
+	public String sign(String plainText) throws Exception
+	{
+		Signature privateSignature = Signature.getInstance("SHA256withRSA");
+		privateSignature.initSign(privateKey);
+		privateSignature.update(plainText.getBytes(StandardCharsets.UTF_8));
+		byte[] signature = privateSignature.sign();
+		return Base64.encodeBase64String(signature);
+	}
+
 
 }
