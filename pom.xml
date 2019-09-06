@@ -12,6 +12,19 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <dependencies>
+		<dependency>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                        <version>4.12</version>
+                        <scope>test</scope>
+                </dependency>
+
+	  	<!-- https://mvnrepository.com/artifact/org.web3j/crypto -->
+                <dependency>
+                        <groupId>org.web3j</groupId>
+                        <artifactId>crypto</artifactId>
+                        <version>4.5.0</version>
+                </dependency>
 		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
