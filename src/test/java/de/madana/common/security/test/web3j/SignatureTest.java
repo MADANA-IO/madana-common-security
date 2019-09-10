@@ -32,6 +32,8 @@ public class SignatureTest
 	public void testIsAddress() {
 		Assert.assertFalse(Signature.isAddress("test"));
 		Assert.assertTrue(Signature.isAddress("0x1FE31cf2A2e78cce2E933ae2EE36fc712BaF7Ba2"));
+		Assert.assertTrue(Signature.isAddress("0x1fE31cf2A2e78cce2E933ae2EE36fc712BaF7Ba2"));
+		Assert.assertTrue(Signature.isAddress("0x1fe31cf2a2e78cce2e933ae2ee36fc712baf7ba2"));
 	}
 	@Test
 	public void testValidateSignature() {

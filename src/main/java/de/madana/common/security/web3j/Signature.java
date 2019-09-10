@@ -34,7 +34,7 @@ public class Signature
 
 	public static boolean isAddress(String address) {
 		String checksum = Keys.toChecksumAddress(address);
-		return checksum.equals(address);
+		return checksum.equalsIgnoreCase(address);
 	}
 	
 	public static boolean validateSignature(String address, String message, String signature) {
