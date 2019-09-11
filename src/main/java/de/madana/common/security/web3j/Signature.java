@@ -34,13 +34,13 @@ public class Signature
 
 	public static boolean isAddress(String address) {
 		String checksum = Keys.toChecksumAddress(address);
-		return checksum.equals(address);
+		return checksum.equalsIgnoreCase(address);
 	}
 	
 	public static boolean validateSignature(String address, String message, String signature) {
 		address = Keys.toChecksumAddress(address);
 		String addressRecovered = Signature.ecRecover(message, signature);
-		return address.equals(addressRecovered);
+		return address.equalsIgnoreCase(addressRecovered);
 	}
 
 	 /** NOTE @source: https://github.com/web3j/web3j/blob/7eab3d5752fb661f58df037a11677f330b8e1117/crypto/src/test/java/org/web3j/crypto/ECRecoverTest.java
