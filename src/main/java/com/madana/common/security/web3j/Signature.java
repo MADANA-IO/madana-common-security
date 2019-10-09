@@ -18,7 +18,7 @@
  * @author:Frieder Paape
  * @contact:dev@madana.io
  ******************************************************************************/
-package de.madana.common.security.web3j;
+package com.madana.common.security.web3j;
 
 import java.math.BigInteger;
 import java.util.Arrays;

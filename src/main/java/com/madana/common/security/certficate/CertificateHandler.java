@@ -18,7 +18,7 @@
  * @author:Jean-Fabian Wenisch
  * @contact:dev@madana.io
  ******************************************************************************/
-package de.madana.common.security.certficate;
+package com.madana.common.security.certficate;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

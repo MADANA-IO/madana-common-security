@@ -18,13 +18,14 @@
  * @author:Frieder Paape
  * @contact:dev@madana.io
  ******************************************************************************/
-package de.madana.common.security.test.web3j;
+package com.madana.common.security.test.web3j;
 
-import de.madana.common.security.web3j.Signature;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.madana.common.security.web3j.Signature;
 
 public class SignatureTest
 {

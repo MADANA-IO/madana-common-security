@@ -18,7 +18,7 @@
  * @author:Jean-Fabian Wenisch
  * @contact:dev@madana.io
  ******************************************************************************/
-package de.madana.common.security;
+package com.madana.common.security;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

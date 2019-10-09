@@ -18,7 +18,7 @@
  * @author:Jean-Fabian Wenisch
  * @contact:dev@madana.io
  ******************************************************************************/
-package de.madana.common.security.test;
+package com.madana.common.security.test;
 
 //Copyright (C) Leejae Karinja 2016 
 
