@@ -210,6 +210,10 @@ public class AsymmetricCryptography
 		PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
 		return pkcs8EncodedKeySpec.getEncoded();
 	}
+	public String getPrivateKeyAsString()
+	{
+		return Base64.encodeBase64String(getPrivateKeyAsByteArray());
+	}
 
 	/**
 	 * Gets the public key.
@@ -225,6 +229,10 @@ public class AsymmetricCryptography
 	{
 		X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());		
 		return x509EncodedKeySpec.getEncoded();
+	}
+	public String getPublicKeyAsString()
+	{
+		return Base64.encodeBase64String(getPublicKeyAsByteArray());
 	}
 	/**
 	 * Gets the keypair.
