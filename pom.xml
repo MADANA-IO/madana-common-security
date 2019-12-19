@@ -76,7 +76,7 @@
 
 	</build>
 
-	<version>${bamboo.mcsecurity.version}</version>
+	<version>0.1.572-master.1</version>
 		<distributionManagement>
 		<repository>
 			<id>github</id>
