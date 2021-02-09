@@ -97,3 +97,22 @@ deploy:
     - tags
   only:
     - production
+
+
+update_node_submodule:
+  allow_failure: true
+  stage: .post
+  image: alpine
+  cache: {}
+  dependencies: []
+  before_script:
+    - apk --no-cache add curl git
+  script:
+    - git pull origin $CI_COMMIT_REF_SLUG
+    - export LATEST_COMMIT_SHA=$(git rev-parse HEAD)
+    - >
+      curl --request PUT --header "PRIVATE-TOKEN: $GL_TOKEN"
+      "https://gitlab.com/api/v4/projects/15527254/repository/submodules/$CI_PROJECT_NAME"
+      --data "branch=$CI_COMMIT_REF_SLUG&commit_sha=$LATEST_COMMIT_SHA&commit_message=fix: Update $CI_PROJECT_NAME submodule reference to ${LATEST_COMMIT_SHA:0:8}"
+  except:
+    - tags
