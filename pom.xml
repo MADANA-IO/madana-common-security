@@ -51,11 +51,7 @@
 			<artifactId>commons-net</artifactId>
 			<version>3.6</version>
 		</dependency>
-		<dependency>
-			<groupId>com.madana.common</groupId>
-			<artifactId>madana-common-restclient</artifactId>
-			<version>0.1.42</version>
-		</dependency>
+	
 	
 	</dependencies>
 	<build>
