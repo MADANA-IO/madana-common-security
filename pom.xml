@@ -5,7 +5,7 @@
 	<groupId>com.madana.common</groupId>
 	<artifactId>madana-common-security</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1.572</version>
+	<version>0.1.573</version>
 	<description>Project including related security features</description>
 	<properties>
 		<java.version>1.8</java.version>
