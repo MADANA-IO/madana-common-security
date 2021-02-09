@@ -5,6 +5,7 @@
 	<groupId>com.madana.common</groupId>
 	<artifactId>madana-common-security</artifactId>
 	<packaging>jar</packaging>
+	<version>0.1.572</version>
 	<description>Project including related security features</description>
 	<properties>
 		<java.version>1.8</java.version>
@@ -50,7 +51,12 @@
 			<artifactId>commons-net</artifactId>
 			<version>3.6</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.madana.common</groupId>
+			<artifactId>madana-common-restclient</artifactId>
+			<version>0.1.42</version>
+		</dependency>
+	
 	</dependencies>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -76,8 +82,15 @@
 
 	</build>
 
-	<version>0.1.572</version>
-		<distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<name>GitHub MADANA-IO Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/madana-io/madana-common</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
 		<repository>
 			<id>github</id>
 			<name>GitHub MADANA-IO Apache Maven Packages</name>
